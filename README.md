@@ -1,154 +1,137 @@
-# Holochain Generic Game
-## tic-tac-toe and checkers examples
+# Guide to implementing your game
 
-## First Challenge - Play a game with yourself
+Hopefully you have completed the exercises in [the previous workbook](https://hackmd.io/aGR24Y91Te28dfdYn4WdVw?both) and have a pretty good idea of the state, moves and validation required for your game.
 
-The first task lets you try out running a holochain instance locally with two agents to play a game of tic-tac-toe. Before you begin make sure you have the holochain conductor `holochain` available on your path.
+The generic game framework makes it easy to develop new two player simple games on Holochain. All that is required is an implementation of:
 
-### 1. Start the conductor
+#### A `MoveType` enum
+This defines the types of moves that can be played in a game. e.g. for checkers we have 
 
-From the repo root directory run the following command
+#### A `GameState` struct
+This defines that the state of game after a particular number of moves have occurred. This must implement the functions `initial`, `render` and `evolve`
 
+#### Implement `is_valid` for Move
+
+This is used to perform validation. This will be evaulated each time a player makes a move to check it is allowed.
+
+In this workbook we will implement tic-tac-toe within the generic game framework.
+
+
+## First steps
+
+- **✍️First up you will need to clone the [empty game framework repo](https://github.com/willemolding/generic-game-holochain/pull/new/empty-framework).**
+
+Take a look around and you will see it exposes some entries and zome functions in the `lib.rs`. You will also notice that this project uses multiple rust files to define the zome. It might be worth revisiting [the rust book chapter on packages, crates and modules](https://doc.rust-lang.org/stable/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html) if you get confused.
+
+All of the places you need to fill in code have been annotated with the tag `<<DEVCAMP-TODO>>`. This should make it easier for you to navigate the codebase. Also note some files have a `DEVCAMP- DO NOT EDIT` header.
+
+## Defining Moves
+
+Lets start with the easiest part. Defining what kind of moves are allowed. In tic-tac-toe there is only one type of move, placing a piece in a position.
+
+- **✍️Follow the steps below to add a move to the `MoveType` enum which represents placing a piece in a position**
+
+![](https://i.imgur.com/BW0Rsfn.gif)
+
+We will revisit the `describe()` function later.
+
+## Defining the Game State
+
+The state of a game of tic-tac-toe is also pretty simple. It is just the location of the pieces places by each player. The state should also store the list of moves made so far.
+
+- **✍️Follow the steps to add a state object for a tic-tac-toe game** 
+
+
+![](https://i.imgur.com/nuhNtIU.gif)
+
+Obviously the initial game board has no moves and no pieces.
+
+- **✍️Also implement the `initial() function`** 
+
+![](https://i.imgur.com/uOHV4my.gif)
+
+We will also revisit the `render()` function later
+
+### State.evolve()
+
+The state evolution function is generally the most difficult part of implementing a game. It is important to remember that *no validation should be done in this function*. It is safe to assume that the state is already valid as is the next_move.
+
+Evolving the state in tic-tac-toe is easy. The new move must be added to the list of moves and then the piece added to the correct player vec.
+
+- **✍️Follow the steps below to add a state evolution for tic-tac-toe.**
+
+![](https://i.imgur.com/6zxco6A.gif)
+
+## Validation
+
+Validation for moves is defined by implementing your own `is_valid` function on the `Move` struct. 
+
+Before we do that we will add some helper functions to make the validation nice and readable.
+
+- ✍️**Add the following helpers on the Piece struct: `is_in_bounds` and `is_empty`**
+
+![](https://i.imgur.com/kp0n5Ue.gif)
+
+- ✍️**Add a helper function to check if it is a given players turn**
+
+![](https://i.imgur.com/UIHoDUa.gif)
+
+and with these we can write a clean is_valid implementation for move
+
+- ✍️**Implement the `is_valid` function for a move**
+
+![](https://i.imgur.com/RJ1UZYP.gif)
+
+- **✍️Note: Don't forget to add the following imports to the validation.rs file**
 ```
-holochain -c ./conductor-config.toml
-```
-
-It might take a few seconds to unlock the keystore but you should see something like the following:
-
-```
-Using config path: ./conductor-config.toml
-Unlocking agent keys:
-Unlocking key for agent 'test_agent1': 
-Reading keystore from ./agent1.keystore
-Unlocking key for agent 'test_agent2': 
-Reading keystore from ./agent2.keystore
-2019-05-17 15:55:37 ThreadId(1):conductor: starting signal loop
-Reading DNA from ./dist/generic-game.dna.json
-Failed to load instance instance1 from storage: ErrorGeneric("State could not be loaded due to NoneError")
-Initializing new chain...
-...
-```
-and then a whole lot of colored debug output. Scanning the debug you should be able to see indication that the conductor is:
-
-- unlocking the keystores
-- loading the game DNA from file
-- creating a local chain for each agent
-- validating the agents first two local chain entries (the `DNA` entry and the `agent` entry)
-
-These are the essential tasks for a holochain instance that is starting for the first time.
-
-### v2. Start the CLI
-
-To keep things simple we will be interacting with our Holochain conductor using a command line interface that connects via HTTP. Make sure you keep the conductor running and in a new terminal window run the following:
-
-```
-cd cli
-cargo run http://localhost:3001 instance1
-```
-
-This will build the CLI and then run it. This is instructing the CLI to connect to a holochain instance running on localhost port 3001 with the instance id `instance1`. After it builds you should see the following:
-
-```
-######################################################################
-CLI interface for games written using the Holochain Generic Game framework.
-Enter "help" for a list of commands.
-Use "create_game <agent_id>" or "join_game <game_address>" to start or join a game.
-Press Ctrl-D or enter "quit" to exit.
-######################################################################
-
-
-Your agent address is "HcScjcgKqXC5pmfvka9DmtEJwVr548yd86UPtJGGoue9ynuikuRTN7oE5zcjgbi"
-
-Send this to other players so they can invite you to a game.
-
-
-No game> 
-```
-
-
-If you see this it means you are now successfully connected to the holochain instance and can participate as this agent. Be sure to test out the commands to see what you can do.
-
-You can't play a game with one agent so open up ~another~ terminal window and connect to the conductor on the port/instance where the second agent is running:
-```
-cd cli
-cargo run http://localhost:3002 instance2
-```
-
-### 3. Play a game
-
-Now the tricky part, to play a game of tic-tac-toe with yourself! Keep the conductor running and both windows with the CLI. We'll refer to one of them as Agent A and the other as Agent B. 
-
-Agent A will be the one to create the game. Copy the agent address from Agent B and run the following command in **Agent A**:
-```
-new_game HcScidPSdAT43q9qirJwt5rHJYjjsvougV3jgSBwdJujszw3bBu5Mktr74Rgnea
-```
-
-This should create a new game and show the following output:
-```
-Non-creator must make the first move 
-
-  x  0 1 2
-y
-0   | | | |
-1   | | | |
-2   | | | |
-
-QmTNHtXZye7vz3d4LQz5zgHvk1wvxbsBHcstorDWQxshfZ> 
+use crate::your_game::MoveType;
+use hdk::holochain_core_types::cas::content::Address;
 ```
 
-We have just commit our first entry in the local chain and DHT! A `Game` entry was created with Agent B as the opponent and shared to the DHT. The hash at the bottom of the screen is the hash/address of the Game entry in the DHT. This is the unique identifier we can use to join this game (Note this will be different for everyone as our Game entry includes a timestamp).
+This function will be consumed by the generic-game framework and run before any move entry can be added to the DHT. Because this is run by all agents that might have to hold the entry it makes cheating practically impossible!
 
-Copy the game address and run the following in **Agent B**
-```
-join_game QmTNHtXZye7vz3d4LQz5zgHvk1wvxbsBHcstorDWQxshfZ
-```
+## Testing
 
-If the Game entry was successfully shared in the previous step Agent B shoud now see:
+For this example we will only add end-to-end tests to test the zome functions and validation work correctly.
 
-```
-Setting current game hash to QmTNHtXZye7vz3d4LQz5zgHvk1wvxbsBHcstorDWQxshfZ
-
-Non-creator must make the first move 
-
-  x  0 1 2
-y
-0   | | | |
-1   | | | |
-2   | | | |
+- **✍️Open up the `test/index.js` file to add tests. Follow each of the below guides to use the testing framework to add a new game, make a valid move and make an invalid move**
 
 
-```
+Create a new game between Alice and Bob
+![](https://i.imgur.com/bBKVBRe.gif)
 
-and as the non-creator we are allowed to make the first move. To see the available moves in this game you can run the `moves` command
+Bob must make the first move
+![](https://i.imgur.com/2kHSCGH.gif)
 
-```
-QmTNHtXZye7vz3d4LQz5zgHvk1wvxbsBHcstorDWQxshfZ> moves
-The valid moves are:
-- {"Place":{"pos":{"x":0,"y":0}}}
-```
+Alice tries to place a piece in the same place. This should fail our validation
+![](https://i.imgur.com/dxtp4Rw.gif)
 
-Lets try making a move. Make sure you are Agent B and run
+- **✍️Run the tests by running `hc test` from the nix-shell in the project root.**
 
-```
-make_move {"Place":{"pos":{"x":0,"y":0}}}
+## Exercises
+
+#### 1. Add some more tests
+
+Add some more calls to `make_move` such that all of the validation failures are tested (e.g. playing out of turn, playing out of bounds, playing on an occupied position).
+
+Use the `get_state` zome function to check that the game state looks as expected in each case e.g.
+
+```javascript
+const game_state = await alice.callSync('main', 'get_state',{
+    game_address: create_game_result.Ok
+})
 ```
 
-and you should get:
+*Remember you can `console.log` any results to visually inspect them when writing tests*
 
-```
-making move: "{\"Place\":{\"pos\":{\"x\":0,\"y\":0}}}"
-Move cast successfully
-Waiting for gossip...
-OK!
+#### 2. Add win conditions
 
-It is your opponents turn 
+The current implementation doesn't know when the game is over.
+- Add a new field to the state struct which encodes if/which player has won
+- Add some extra logic to the state evolution function which checks all the moves made and updates the state with the victory
+- The validation should not allow any moves to be made after the game has been won
 
-  x  0 1 2
-y
-0   |X| | |
-1   | | | |
-2   | | | |
+#### 3. Add a `Resign` move
 
-```
+The current implementation only has a single move type `Place`. Add another move type variant, `Resign`, which takes no parameters. On detecting a resign move the state evolution function should be updated to say the other player has won
 
-Thats it! Now you know how it works you can play out the rest of the game. Make sure you test what happens if you try to make an invalid move.
