@@ -1,26 +1,24 @@
-///////////////////////////////
-// !! DEVCAMP- DO NOT EDIT !!//
-///////////////////////////////
-
 use std::convert::TryFrom;
 use hdk::{
     utils,
     entry_definition::ValidatingEntryType,
     error::{ZomeApiResult, ZomeApiError},
-};
-use hdk::holochain_core_types::{
-    cas::content::Address,
-    dna::entry_types::Sharing,
-    error::HolochainError,
-    json::JsonString,
-    validation::EntryValidationData,
-    entry::Entry,
-    cas::content::AddressableContent,
-    link::LinkMatch,
+    holochain_persistence_api::{
+        cas::content::{AddressableContent, Address},
+    },
+    holochain_json_api::{
+        error::JsonError, json::JsonString,
+    },
+    holochain_core_types::{
+        dna::entry_types::Sharing,
+        validation::EntryValidationData,
+        entry::Entry,
+        link::LinkMatch,
+    }
 };
 
 use crate::game_move::Move;
-use crate::{GameState};
+use crate::GameState;
 
 #[derive(Clone, Debug, Serialize, Deserialize, DefaultJson)]
 pub struct Game {
