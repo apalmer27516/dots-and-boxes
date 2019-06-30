@@ -19,7 +19,7 @@ use crate::game::Game;
 
 #[derive(Clone, Debug, Serialize, Deserialize, DefaultJson)]
 pub struct GameState {
-    // <<DEVCAMP>>
+    // <<DEVCAMP-TODO>>
     // pub moves: Vec<Move>,
     // Implement your own game state
     // May be helpful to split this into state for each player
