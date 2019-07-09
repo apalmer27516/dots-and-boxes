@@ -1,4 +1,55 @@
-# Guide to implementing your game
+# Dots and Boxes
+This game was started as a part of the June 2019 HoloChain DevCamp. I still have other tests to add, other odds and ends, and hopefully a GUI, but here is a functional version that is passing a fairly complete integration test. See below for an overview of the framework this was built within, but first a primer to this particular game.
+
+#Board and Moves
+The gameboard is a grid of N x N. Grid points are labeled from a lower left origin using an X and Y axis. Numbering starts from 0. A move represents the creation of a line. It specifies an X,Y coordinate and a direction of Up (draws a vertical line) or Right (draws a horizontal line). //Game, author, and previous move have to also be included with a move to make it unique.//
+
+#Validation Rules
+* Status
+    * Game must have 2 players
+    * Game cannot have more than 2 players
+* Location
+    * Line segment must not already exist
+    * Line segment must be within bounds
+* Turns
+    * Other player must have moved previously and not completed any boxes Unless there are no moves and then the player #2 goes first.
+
+#State
+* Summary Info
+    * Number of completed boxes for each player
+    * Whose turn is next
+    * Game Status: Ready, In Progress, Surrendered, Completed
+* Full list of all line segments - grouped horizontally and vertically (Tic-tac-toe grouped by players so that turns could be checked so might have to group both ways.)
+
+##CLI Board representation
+`2·―·―·
+   | | |
+y 1·―·―·
+   | | |
+  0·―·―·
+   0 1 2
+     x
+Char Position
+0,0,Right=>2,1
+1,1,Right=>4,3
+0,0,Up=>1,2
+1,1,Up=>3,4`
+
+**Function:**
+
+Store all moves into a full array for horizontal and vertical line segments indicating true/false if the line exists. //Alternatively: Could store the sparse array of lines. The contains logic will let me find if all the components of the box exist.//
+
+* If no moves recorded and 2 players, state is ready
+* If a player has resigned, state is surrendered
+* If all boxes completed, state is Completed .Boxes = (N-1)^2
+* Otherwise it is In Progress:
+    * Check if new line would complete a box
+        * If new line is Horizontal, Check if box will be completed by checking that line segments exist for: V:x,y; V:x+1,y; V:x,y-1; V:x+1,y-1; H:x,y+1; and H:x,y-1 (Need to avoid checking out of boundary conditions)
+        * If new line is Vertical, Check if box will be completed by checking that line segments exist for: H:x-1,y; H:x-1,y+1; H:x,y; H:x,y+1; V:x-1,y; and V:x+1,y1 (Need to avoid checking out of boundary conditions)
+    * If new box then increment player's by 1 or 2 accordingly and flag next turn as theirs. Otherwise, flag opposite player's turns as next.
+
+
+## Guide to implementing your game
 
 Hopefully you have completed the exercises in [the previous workbook](https://hackmd.io/aGR24Y91Te28dfdYn4WdVw?both) and have a pretty good idea of the state, moves and validation required for your game.
 

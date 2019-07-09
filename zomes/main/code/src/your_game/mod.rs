@@ -1,6 +1,6 @@
 /**
- * All of this code is specific to the game Checkers
- * By changing the moves, state, reducer and validation rules you can implement you own game.
+ * Dots and Boxes Game: Code started from implementation of Tic-Tac-Toe per the Day 4 of the June 2019
+ * dev-camp.
  */
 
 pub mod state;
