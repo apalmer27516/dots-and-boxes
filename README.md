@@ -1,10 +1,10 @@
 # Dots and Boxes
 This game was started as a part of the June 2019 HoloChain DevCamp. I still have other tests to add, other odds and ends, and hopefully a GUI, but here is a functional version that is passing a fairly complete integration test. See below for an overview of the framework this was built within, but first a primer to this particular game.
 
-#Board and Moves
+# Board and Moves
 The gameboard is a grid of N x N. Grid points are labeled from a lower left origin using an X and Y axis. Numbering starts from 0. A move represents the creation of a line. It specifies an X,Y coordinate and a direction of Up (draws a vertical line) or Right (draws a horizontal line). //Game, author, and previous move have to also be included with a move to make it unique.//
 
-#Validation Rules
+# Validation Rules
 * Status
     * Game must have 2 players
     * Game cannot have more than 2 players
@@ -14,26 +14,29 @@ The gameboard is a grid of N x N. Grid points are labeled from a lower left orig
 * Turns
     * Other player must have moved previously and not completed any boxes Unless there are no moves and then the player #2 goes first.
 
-#State
+# State
 * Summary Info
     * Number of completed boxes for each player
     * Whose turn is next
     * Game Status: Ready, In Progress, Surrendered, Completed
 * Full list of all line segments - grouped horizontally and vertically (Tic-tac-toe grouped by players so that turns could be checked so might have to group both ways.)
 
-##CLI Board representation
-`2·―·―·
+## CLI Board representation
+
+```
+2·―·―·
    | | |
 y 1·―·―·
    | | |
   0·―·―·
    0 1 2
      x
-Char Position
+Char Position in rendering matrix for board:
 0,0,Right=>2,1
 1,1,Right=>4,3
 0,0,Up=>1,2
-1,1,Up=>3,4`
+1,1,Up=>3,4
+```
 
 **Function:**
 
